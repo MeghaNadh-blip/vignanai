@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% block title %}Analytics | Vignan AI{% endblock %}
+{% block page_label %}Analytics{% endblock %}
+{% block content %}<section class="page-hero"><span class="eyebrow">Progress report</span><h1>Study Analytics</h1><p>Activity summary for {{ name }}.</p></section><section class="stats-grid"><div class="stat-card"><span>Topics Planned</span><strong>{{ topics_planned }}</strong></div><div class="stat-card"><span>Quizzes</span><strong>{{ quizzes_generated }}</strong></div><div class="stat-card"><span>Code Reviews</span><strong>{{ codes_analyzed }}</strong></div></section><section class="result-card"><div class="result-top"><h2>AI Strategy Report</h2><a class="secondary-btn" href="{{ url_for('download_report') }}">Download PDF</a></div><div class="ai-response">{{ report|ai_format }}</div></section>{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Dashboard | Vignan AI{% endblock %}
+{% block page_label %}{% endblock %}
+{% block content %}
+<section class="dash-compact-hero">
+  <div>
+    <span class="eyebrow">Welcome back</span>
+    <h1>{{ name }} 👋</h1>
+    <p>Your focused AI workspace for chat, notes, questions, quizzes, assignments, planning, and code help.</p>
+  </div>
+  <div class="dash-quick-actions">
+    <a class="primary-btn" href="{{ url_for('chat') }}">Ask AI</a>
+    <a class="secondary-btn" href="{{ url_for('question_generator') }}">Generate Questions</a>
+  </div>
+</section>
+
+<section class="dash-workflow">
+  <div class="workflow-step"><span>1</span><strong>Upload or ask</strong><small>Add material or type your doubt.</small></div>
+  <div class="workflow-step"><span>2</span><strong>Generate</strong><small>Create notes, quizzes, Q&A, plans, or assignments.</small></div>
+  <div class="workflow-step"><span>3</span><strong>Download / practice</strong><small>Export PDF/DOCX or revise with quiz mode.</small></div>
+</section>
+
+<section class="section-head compact-section-head">
+  <div><span class="eyebrow">Tools</span><h2>Choose what you want to do</h2></div>
+</section>
+
+<section class="tool-grid premium-tool-grid">
+  <a class="tool-card featured" href="{{ url_for('chat') }}"><span>💬</span><h3>AI Chat</h3><p>Ask doubts, continue saved chats, and get study help.</p></a>
+  <a class="tool-card" href="{{ url_for('question_generator') }}"><span>❓</span><h3>Question Generator</h3><p>Create Q&A, MCQs, viva and interview-style questions.</p></a>
+  <a class="tool-card" href="{{ url_for('notes') }}"><span>📝</span><h3>Notes</h3><p>Generate short, detailed, and exam-focused notes.</p></a>
+  <a class="tool-card" href="{{ url_for('assignment_generator') }}"><span>📄</span><h3>Assignments</h3><p>Create structured assignments with PDF/DOCX export.</p></a>
+  <a class="tool-card" href="{{ url_for('quiz') }}"><span>🧩</span><h3>Quiz</h3><p>Practice MCQs with scoring and review.</p></a>
+  <a class="tool-card" href="{{ url_for('planner') }}"><span>🗓</span><h3>Planner</h3><p>Convert syllabus or goals into day-wise study plans.</p></a>
+  <a class="tool-card" href="{{ url_for('debugger') }}"><span>🛠</span><h3>Debugger</h3><p>Fix beginner code errors and understand the reason.</p></a>
+  <a class="tool-card" href="{{ url_for('analytics') }}"><span>📊</span><h3>Analytics</h3><p>View activity and learning progress summary.</p></a>
+</section>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "auth_base.html" %}
+{% block title %}Register | Vignan AI{% endblock %}
+{% block content %}
+<div class="auth-card-head centered-auth-head">
+  <span class="eyebrow">Create account</span>
+  <h2>Join Vignan AI</h2>
+  <p class="muted">Create your workspace account.</p>
+</div>
+<form method="POST" class="premium-form auth-form-v2"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="role-picker" aria-label="Choose role">
+    <label class="role-card">
+      <input type="radio" name="role" value="student" required>
+      <span class="role-icon">🎓</span>
+      <strong>Student</strong>
+      <small>Use AI study tools</small>
+    </label>
+    <label class="role-card">
+      <input type="radio" name="role" value="admin" required>
+      <span class="role-icon">🛡️</span>
+      <strong>Admin</strong>
+      <small>Needs access code</small>
+    </label>
+  </div>
+  <label class="input-shell admin-code-box" data-admin-code-box style="display:none;"><span>Admin Access Code</span><input type="password" name="admin_code" placeholder="Enter admin code"></label>
+  <label class="input-shell"><span>Name</span><input type="text" name="name" placeholder="Enter your name" required></label>
+  <label class="input-shell"><span>Email</span><input type="email" name="email" placeholder="Enter your email" required></label>
+  <label class="input-shell"><span>Password</span><div class="password-wrap"><input type="password" name="password" placeholder="Create password" required><button class="password-toggle" type="button">Show</button></div></label>
+  <button type="submit" class="primary-btn full auth-submit">Create Account</button>
+</form>
+<p class="form-link">Already registered? <a href="{{ url_for('login') }}">Login here</a></p>
+{% endblock %}

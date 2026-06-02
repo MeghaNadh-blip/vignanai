@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Admin | Vignan AI{% endblock %}
+{% block page_label %}Admin Dashboard{% endblock %}
+{% block content %}
+<section class="dashboard-hero"><div><span class="eyebrow">Admin control</span><h1>Welcome, {{ name }}</h1><p>Manage users, feedback, and platform activity.</p></div></section>
+<section class="stats-grid"><div class="stat-card"><span>Total Users</span><strong>{{ total_users }}</strong></div><div class="stat-card"><span>Students</span><strong>{{ total_students }}</strong></div><div class="stat-card"><span>Admin Mode</span><strong>Active</strong></div></section>
+<section class="tool-grid"><a class="tool-card" href="{{ url_for('admin_users') }}"><span>👥</span><h3>Manage Users</h3><p>Update roles and remove accounts.</p></a><a class="tool-card" href="{{ url_for('admin_feedback') }}"><span>✉</span><h3>Feedback</h3><p>Read student messages.</p></a><a class="tool-card" href="{{ url_for('assignment_generator') }}"><span>📄</span><h3>Assignment Generator</h3><p>Create academic assignments.</p></a></section>
+{% endblock %}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Vignan AI{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=v2-dashboard-final-1">
+</head>
+<body class="app-body {% block body_class %}{% endblock %}">
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand-block" href="{{ url_for('admin') if session.get('role') == 'admin' else url_for('dashboard') }}">
+        <span class="brand-mark">VA</span>
+        <span>
+          <strong>Vignan AI</strong>
+        </span>
+      </a>
+      <nav class="side-nav">
+        {% if session.get('role') == 'admin' %}
+          <a href="{{ url_for('admin') }}" class="nav-item">⌘ <span>Admin Dashboard</span></a>
+          <a href="{{ url_for('admin_users') }}" class="nav-item">👥 <span>Manage Users</span></a>
+          <a href="{{ url_for('admin_feedback') }}" class="nav-item">✉ <span>Manage Feedback</span></a>
+        {% else %}
+          <a href="{{ url_for('dashboard') }}" class="nav-item">🏠 <span>Dashboard</span></a>
+        {% endif %}
+        <a href="{{ url_for('chat') }}" class="nav-item">💬 <span>AI Chat</span></a>
+        <a href="{{ url_for('quiz') }}" class="nav-item">🧩 <span>Quiz</span></a>
+        <a href="{{ url_for('debugger') }}" class="nav-item">🛠 <span>Debugger</span></a>
+        <a href="{{ url_for('planner') }}" class="nav-item">🗓 <span>Planner</span></a>
+        <a href="{{ url_for('notes') }}" class="nav-item">📝 <span>Notes</span></a>
+        <a href="{{ url_for('question_generator') }}" class="nav-item">❓ <span>Question Generator</span></a>
+        <a href="{{ url_for('assignment_generator') }}" class="nav-item">📄 <span>Assignment Generator</span></a>
+        <a href="{{ url_for('leaderboard') }}" class="nav-item">🏆 <span>Leaderboard</span></a>
+        <a href="{{ url_for('analytics') }}" class="nav-item">📊 <span>Analytics</span></a>
+        <a href="{{ url_for('feedback') }}" class="nav-item">💡 <span>Feedback</span></a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-mini">
+          <span class="avatar">{{ (session.get('name') or 'U')[:1] }}</span>
+          <span><strong>{{ session.get('name', 'Student') }}</strong><small>{{ session.get('role', 'student')|title }}</small></span>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-shell">
+      <header class="topbar">
+        <button class="icon-button" id="sidebarToggle" type="button" aria-label="Toggle sidebar">☰</button>
+        <div class="topbar-title">
+          <span class="eyebrow">Vignan's Foundation for Science, Technology & Research</span>
+          <strong>{% block page_label %}AI Academic Platform{% endblock %}</strong>
+        </div>
+        <div class="topbar-actions">
+          <button class="theme-toggle" type="button" aria-label="Toggle theme">🌙</button>
+          <a class="logout-button" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+      </header>
+
+      <main class="page-wrap">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="flash-stack">
+              {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+  <div class="loading-overlay" id="loadingOverlay"><div class="loader-card"><span class="spinner"></span><strong>Working on it...</strong><small>Generating your academic content</small></div></div>
+  <script src="{{ url_for('static', filename='menu.js') }}?v=v2-dashboard-final-1"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

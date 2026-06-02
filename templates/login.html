@@ -1,0 +1,30 @@
+{% extends "auth_base.html" %}
+{% block title %}Login | Vignan AI{% endblock %}
+{% block content %}
+<div class="auth-card-head">
+  <span class="eyebrow">Welcome back</span>
+  <h2>Login to your workspace</h2>
+  <p class="muted">Enter your details to continue.</p>
+</div>
+<form method="POST" class="premium-form auth-form-v2"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="role-picker" aria-label="Choose role">
+    <label class="role-card">
+      <input type="radio" name="role" value="student" required>
+      <span class="role-icon">🎓</span>
+      <strong>Student</strong>
+      <small>Open study tools</small>
+    </label>
+    <label class="role-card">
+      <input type="radio" name="role" value="admin" required>
+      <span class="role-icon">🛡️</span>
+      <strong>Admin</strong>
+      <small>Manage platform</small>
+    </label>
+  </div>
+  <label class="input-shell"><span>Email</span><input type="email" name="email" placeholder="Enter your email" required></label>
+  <label class="input-shell"><span>Password</span><div class="password-wrap"><input type="password" name="password" placeholder="Enter your password" required><button class="password-toggle" type="button">Show</button></div></label>
+  <div class="auth-row"><label class="check-row"><input type="checkbox" name="remember"> <span>Remember this device</span></label><a href="{{ url_for('forgot_password') }}">Forgot?</a></div>
+  <button type="submit" class="primary-btn full auth-submit">Login</button>
+</form>
+<p class="form-link">New here? <a href="{{ url_for('register') }}">Create account</a></p>
+{% endblock %}

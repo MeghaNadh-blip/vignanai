@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard | Vignan AI{% endblock %}
+{% block page_label %}Leaderboard{% endblock %}
+{% block content %}<section class="page-hero"><span class="eyebrow">Activity ranking</span><h1>Leaderboard</h1><p>Students ranked by academic platform activity.</p></section><section class="panel table-panel"><table><thead><tr><th>Rank</th><th>Name</th><th>Plans</th><th>Quizzes</th><th>Code</th><th>Total</th></tr></thead><tbody>{% for student in students %}<tr><td>#{{ loop.index }}</td><td>{{ student.name }}</td><td>{{ student.topics_planned }}</td><td>{{ student.quizzes_generated }}</td><td>{{ student.codes_analyzed }}</td><td><strong>{{ student.total_score }}</strong></td></tr>{% else %}<tr><td colspan="6">No students yet.</td></tr>{% endfor %}</tbody></table></section>{% endblock %}

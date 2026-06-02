@@ -1,0 +1,4 @@
+{% extends "base.html" %}
+{% block title %}Feedback Management | Vignan AI{% endblock %}
+{% block page_label %}Feedback Management{% endblock %}
+{% block content %}<section class="page-hero"><span class="eyebrow">Admin</span><h1>Feedback Messages</h1><p>Review student feedback.</p></section><section class="panel table-panel"><table><thead><tr><th>User</th><th>Subject</th><th>Message</th><th>Created</th></tr></thead><tbody>{% for item in feedback_messages %}<tr><td>{{ item.username }}</td><td>{{ item.subject }}</td><td>{{ item.message }}</td><td>{{ item.created_at }}</td></tr>{% else %}<tr><td colspan="4">No feedback messages.</td></tr>{% endfor %}</tbody></table></section>{% endblock %}

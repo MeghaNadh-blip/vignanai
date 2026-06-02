@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}AI Chat | Vignan AI{% endblock %}
+{% block page_label %}AI Chat Workspace{% endblock %}
+{% block body_class %}chat-page{% endblock %}
+{% block content %}
+<section class="chat-v3">
+  <aside class="chat-history chat-card">
+    <div class="chat-side-top">
+      <div>
+        <span class="eyebrow">Workspace</span>
+        <h2>Chats</h2>
+      </div>
+      <a class="primary-btn small" href="{{ url_for('chat', new=1) }}">+ New</a>
+    </div>
+
+    <form class="chat-search" method="GET" action="{{ url_for('chat') }}">
+      <input name="q" value="{{ search_query or '' }}" placeholder="Search chats">
+      <button type="submit">Search</button>
+    </form>
+
+    <div class="chat-topic-list">
+      {% if chat_topics %}
+        {% for topic in chat_topics %}
+        <article class="chat-topic {% if active_chat_id == topic.id %}active{% endif %}">
+          <a class="topic-link" href="{{ url_for('chat', chat_id=topic.id) }}">
+            <span class="topic-icon">{% if topic.pinned %}📌{% else %}💬{% endif %}</span>
+            <span>{{ topic.title }}</span>
+          </a>
+          <div class="chat-topic-actions">
+            <form method="POST" action="{{ url_for('pin_chat', chat_id=topic.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button title="Pin/unpin" type="submit">📌</button></form>
+            <details>
+              <summary title="Rename">✏️</summary>
+              <form method="POST" action="{{ url_for('rename_chat', chat_id=topic.id) }}" class="rename-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input name="title" maxlength="60" required placeholder="Rename chat">
+                <button>Save</button>
+              </form>
+            </details>
+            <form method="POST" action="{{ url_for('delete_chat', chat_id=topic.id) }}" onsubmit="return confirm('Delete this chat?');"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button title="Delete" type="submit">🗑</button></form>
+          </div>
+        </article>
+        {% endfor %}
+      {% else %}
+        <div class="chat-list-empty">
+          <span>💬</span>
+          <strong>No chats yet</strong>
+          <small>Your conversations will appear here.</small>
+        </div>
+      {% endif %}
+    </div>
+  </aside>
+
+  <main class="chat-window chat-card">
+    <header class="chat-hero chat-hero-v3">
+      <div>
+        <span class="eyebrow">Vignan AI Assistant</span>
+        <h1>AI Chat</h1>
+        <p>Ask normally, or attach a PDF, DOCX, PPTX, TXT, or image. When you upload material, AI will answer from that file first.</p>
+      </div>
+      {% if active_chat_id != '__new__' and chat_history %}
+      <div class="chat-tools">
+        <form method="POST" action="{{ url_for('regenerate_chat', chat_id=active_chat_id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="secondary-btn" type="submit">Regenerate</button></form>
+        <form method="POST" action="{{ url_for('clear_chat', chat_id=active_chat_id) }}" onsubmit="return confirm('Clear all messages in this chat?');"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="secondary-btn" type="submit">Clear</button></form>
+        <a class="secondary-btn" href="{{ url_for('export_chat', chat_id=active_chat_id, file_type='pdf') }}">PDF</a>
+        <a class="secondary-btn" href="{{ url_for('export_chat', chat_id=active_chat_id, file_type='docx') }}">Word</a>
+      </div>
+      {% endif %}
+    </header>
+
+    <div class="chat-messages" id="messages">
+      {% if chat_history %}
+        {% for message in chat_history %}
+        <article class="message {{ 'user' if message.role == 'user' else 'assistant' }}">
+          <div class="msg-avatar">{{ 'You' if message.role == 'user' else 'AI' }}</div>
+          <div class="msg-bubble">
+            {% if message.role == 'assistant' %}
+              <div class="ai-response">{{ message.text|ai_format }}</div>
+              <button class="mini-action copy-btn" type="button" data-copy="{{ message.text|e }}">Copy response</button>
+            {% else %}
+              <p>{{ message.text }}</p>
+              {% if message.attachment_name %}
+                <div class="attachment-preview">📎 <strong>{{ message.attachment_name }}</strong><small>Uploaded material used for this answer</small></div>
+              {% endif %}
+              <details class="edit-message">
+                <summary>Edit message</summary>
+                <form method="POST" action="{{ url_for('edit_chat_message', chat_id=active_chat_id, message_index=loop.index0) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <textarea name="message_text" rows="3" required>{{ message.text }}</textarea>
+                  <button class="secondary-btn" type="submit">Update answer</button>
+                </form>
+              </details>
+            {% endif %}
+          </div>
+        </article>
+        {% endfor %}
+      {% else %}
+        <div class="chat-empty chat-empty-v3">
+          <div class="empty-orb">✨</div>
+          <h2>No messages yet</h2>
+          <p>Type a question, or attach study material and ask the AI to explain it.</p>
+          <div class="empty-chips"><span>PDF</span><span>Images</span><span>DOCX</span><span>PPTX</span><span>TXT</span></div>
+        </div>
+      {% endif %}
+      <article class="message assistant typing-row" id="typingRow" style="display:none;">
+        <div class="msg-avatar">AI</div>
+        <div class="msg-bubble"><p class="typing-dots">Reading and thinking<span>.</span><span>.</span><span>.</span></p></div>
+      </article>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="chat-composer chat-composer-v3" id="chatForm"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="hidden" name="chat_id" value="{{ active_chat_id }}">
+      <label class="file-chip" title="Attach file or image">📎<input id="chatFile" type="file" name="chat_file" accept=".pdf,.docx,.pptx,.txt,.png,.jpg,.jpeg,.webp,.bmp"></label>
+      <div class="composer-main">
+        <div id="selectedFile" class="selected-file" style="display:none;"></div>
+        <textarea name="question" rows="1" placeholder="Ask a question, or attach a file/image and ask about it"></textarea>
+      </div>
+      <button class="primary-btn" type="submit">Send</button>
+    </form>
+  </main>
+</section>
+<script>
+const messages=document.getElementById('messages');
+if(messages){messages.scrollTop=messages.scrollHeight;}
+document.querySelectorAll('.copy-btn').forEach(btn=>btn.addEventListener('click', async()=>{await navigator.clipboard.writeText(btn.dataset.copy||''); const old=btn.textContent; btn.textContent='Copied'; setTimeout(()=>btn.textContent=old,1200);}));
+const form=document.getElementById('chatForm');
+const typing=document.getElementById('typingRow');
+if(form&&typing){form.addEventListener('submit',()=>{typing.style.display='flex'; setTimeout(()=>{messages.scrollTop=messages.scrollHeight;},50);});}
+const fileInput=document.getElementById('chatFile');
+const selectedFile=document.getElementById('selectedFile');
+if(fileInput&&selectedFile){fileInput.addEventListener('change',()=>{const file=fileInput.files&&fileInput.files[0]; if(file){selectedFile.style.display='flex'; selectedFile.textContent='Attached: '+file.name;} else {selectedFile.style.display='none'; selectedFile.textContent='';}});}
+</script>
+{% endblock %}

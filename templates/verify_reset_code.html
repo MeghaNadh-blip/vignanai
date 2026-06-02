@@ -1,0 +1,17 @@
+{% extends "auth_base.html" %}
+{% block title %}Verify Code | Vignan AI{% endblock %}
+{% block content %}
+<div class="auth-card-head centered-auth-head">
+  <span class="eyebrow">Reset password</span>
+  <h2>Enter your code</h2>
+  <p class="muted">Check your email for the 6-digit code, then create a new password.</p>
+</div>
+<form method="POST" action="{{ url_for('verify_reset_code') }}" class="premium-form auth-form-v2"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label class="input-shell"><span>Email</span><input type="email" name="email" value="{{ reset_email }}" placeholder="you@example.com" required></label>
+  <label class="input-shell"><span>6-digit Code</span><input type="text" name="code" maxlength="6" pattern="[0-9]{6}" placeholder="123456" required></label>
+  <label class="input-shell"><span>New Password</span><div class="password-wrap"><input type="password" name="new_password" placeholder="New password" required><button class="password-toggle" type="button">Show</button></div></label>
+  <label class="input-shell"><span>Confirm Password</span><input type="password" name="confirm_password" placeholder="Confirm password" required></label>
+  <button type="submit" class="primary-btn full auth-submit">Reset Password</button>
+</form>
+<p class="form-link"><a href="{{ url_for('forgot_password') }}">Send code again</a> · <a href="{{ url_for('login') }}">Back to login</a></p>
+{% endblock %}

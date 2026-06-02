@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% block title %}Interactive Quiz | Vignan AI{% endblock %}
+{% block page_label %}Interactive Quiz{% endblock %}
+{% block content %}
+<section class="quiz-premium-page">
+    <section class="quiz-builder-card">
+        <div class="quiz-builder-head">
+            <div>
+                <span class="eyebrow">Practice smarter</span>
+                <h1>Interactive Quiz</h1>
+                <p>Paste your study material, generate MCQs, select answers, and check your score.</p>
+            </div>
+            <div class="counter-pill">Quizzes generated: {{ quizzes_generated }}</div>
+        </div>
+
+        <form method="POST" class="premium-form loading-form quiz-builder-form"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <label>Study Material
+                <textarea name="study_material" rows="7" required placeholder="Paste your study material here">{{ study_material }}</textarea>
+            </label>
+
+            <label>Question Count
+                <select name="question_count" required>
+                    <option value="" disabled {% if not question_count %}selected{% endif %}>Select question count</option>
+                    {% for count in range(3, 11) %}
+                        <option value="{{ count }}" {% if question_count == count %}selected{% endif %}>{{ count }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+
+            <button class="primary-btn" type="submit">Generate Quiz</button>
+        </form>
+    </section>
+
+    {% if quiz_error %}
+        <section class="quiz-alert">{{ quiz_error }}</section>
+    {% endif %}
+
+    {% if quiz_items %}
+    <section class="quiz-play-card" id="interactiveQuiz" data-total="{{ quiz_items|length }}">
+        <div class="quiz-progress-box">
+            <div class="quiz-progress-row">
+                <strong>Answered <span id="answeredCount">0</span>/{{ quiz_items|length }}</strong>
+                <span id="quizStatusText">Complete all questions, then check your score.</span>
+            </div>
+            <div class="quiz-progress-track"><div id="quizProgressFill" class="quiz-progress-fill"></div></div>
+        </div>
+
+        <form id="quizAnswerForm">
+            {% for item in quiz_items %}
+            {% set q_index = loop.index0 %}
+            <article class="question-card" data-question-index="{{ q_index }}" data-correct="{{ item.correct_answer }}">
+                <div class="question-card-top">
+                    <span>Question {{ loop.index }}</span>
+                    <span class="question-status">Pending</span>
+                </div>
+                <h2>{{ item.question }}</h2>
+
+                <div class="option-list">
+                    {% for key, value in item.options.items() %}
+                    <label class="quiz-option" data-option="{{ key }}">
+                        <input type="radio" name="q{{ q_index }}" value="{{ key }}">
+                        <span class="option-key">{{ key }}.</span>
+                        <span class="option-text">{{ value }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+
+                <div class="quiz-explanation" hidden>
+                    <strong>Correct Answer: {{ item.correct_answer }}</strong>
+                    <p>{{ item.explanation }}</p>
+                </div>
+            </article>
+            {% endfor %}
+
+            <div class="quiz-actions-bar">
+                <button type="button" class="primary-btn" id="checkScoreBtn">Check Score</button>
+                <button type="button" class="secondary-btn" id="reviewMissingBtn">Review Missing</button>
+                <button type="button" class="secondary-btn" id="retryQuizBtn">Retry</button>
+            </div>
+        </form>
+
+        <section class="score-card" id="scoreCard" hidden>
+            <span class="eyebrow">Quiz Result</span>
+            <h2>Your Score: <span id="scoreValue">0</span>/{{ quiz_items|length }}</h2>
+            <p id="scoreMessage">Keep practicing and review the explanations below.</p>
+        </section>
+    </section>
+    {% else %}
+        <section class="empty-state">No quiz generated yet. Paste study material and create your first interactive quiz.</section>
+    {% endif %}
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const quiz = document.getElementById('interactiveQuiz');
+    if (!quiz) return;
+
+    const total = Number(quiz.dataset.total || 0);
+    const answeredCount = document.getElementById('answeredCount');
+    const progressFill = document.getElementById('quizProgressFill');
+    const statusText = document.getElementById('quizStatusText');
+    const checkBtn = document.getElementById('checkScoreBtn');
+    const retryBtn = document.getElementById('retryQuizBtn');
+    const reviewBtn = document.getElementById('reviewMissingBtn');
+    const scoreCard = document.getElementById('scoreCard');
+    const scoreValue = document.getElementById('scoreValue');
+    const scoreMessage = document.getElementById('scoreMessage');
+    const questionCards = Array.from(document.querySelectorAll('.question-card'));
+
+    function updateProgress() {
+        let answered = 0;
+        questionCards.forEach((card, index) => {
+            const selected = card.querySelector(`input[name="q${index}"]:checked`);
+            const badge = card.querySelector('.question-status');
+            if (selected) {
+                answered++;
+                badge.textContent = 'Answered';
+                badge.classList.add('answered');
+            } else {
+                badge.textContent = 'Pending';
+                badge.classList.remove('answered');
+            }
+        });
+        answeredCount.textContent = answered;
+        progressFill.style.width = total ? `${(answered / total) * 100}%` : '0%';
+        statusText.textContent = answered === total ? 'Ready to check your score.' : 'Complete all questions, then check your score.';
+    }
+
+    quiz.addEventListener('change', function (event) {
+        if (event.target.matches('input[type="radio"]')) {
+            const card = event.target.closest('.question-card');
+            card.querySelectorAll('.quiz-option').forEach(opt => opt.classList.remove('selected'));
+            event.target.closest('.quiz-option').classList.add('selected');
+            updateProgress();
+        }
+    });
+
+    reviewBtn.addEventListener('click', function () {
+        const missing = questionCards.find((card, index) => !card.querySelector(`input[name="q${index}"]:checked`));
+        if (missing) {
+            missing.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            missing.classList.add('shake-focus');
+            setTimeout(() => missing.classList.remove('shake-focus'), 900);
+        }
+    });
+
+    retryBtn.addEventListener('click', function () {
+        questionCards.forEach(card => {
+            card.classList.remove('correct-card', 'wrong-card');
+            card.querySelectorAll('input[type="radio"]').forEach(input => {
+                input.checked = false;
+                input.disabled = false;
+            });
+            card.querySelectorAll('.quiz-option').forEach(opt => opt.classList.remove('selected', 'correct-option', 'wrong-option'));
+            card.querySelector('.quiz-explanation').hidden = true;
+            const badge = card.querySelector('.question-status');
+            badge.textContent = 'Pending';
+            badge.className = 'question-status';
+        });
+        scoreCard.hidden = true;
+        updateProgress();
+        quiz.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
+    checkBtn.addEventListener('click', function () {
+        let score = 0;
+        let answered = 0;
+        questionCards.forEach((card, index) => {
+            const correct = card.dataset.correct;
+            const selected = card.querySelector(`input[name="q${index}"]:checked`);
+            const badge = card.querySelector('.question-status');
+            const explanation = card.querySelector('.quiz-explanation');
+            card.querySelectorAll('input[type="radio"]').forEach(input => input.disabled = true);
+            card.querySelectorAll('.quiz-option').forEach(option => {
+                const optionKey = option.dataset.option;
+                option.classList.remove('correct-option', 'wrong-option');
+                if (optionKey === correct) option.classList.add('correct-option');
+            });
+            if (selected) {
+                answered++;
+                if (selected.value === correct) {
+                    score++;
+                    card.classList.add('correct-card');
+                    card.classList.remove('wrong-card');
+                    badge.textContent = 'Correct';
+                    badge.className = 'question-status correct';
+                } else {
+                    card.classList.add('wrong-card');
+                    card.classList.remove('correct-card');
+                    selected.closest('.quiz-option').classList.add('wrong-option');
+                    badge.textContent = 'Wrong';
+                    badge.className = 'question-status wrong';
+                }
+            } else {
+                card.classList.add('wrong-card');
+                badge.textContent = 'Missing';
+                badge.className = 'question-status wrong';
+            }
+            explanation.hidden = false;
+        });
+        scoreValue.textContent = score;
+        scoreMessage.textContent = answered < total ? 'Some questions were not answered. Review the correct answers below.' : 'Great effort. Review explanations to improve retention.';
+        scoreCard.hidden = false;
+        scoreCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    updateProgress();
+});
+</script>
+{% endblock %}

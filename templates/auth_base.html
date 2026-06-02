@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Vignan AI{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=auth-otp-admin-1">
+</head>
+<body class="auth-body auth-v2-body auth-simple-body">
+  <div class="auth-bg-glow auth-bg-glow-one"></div>
+  <div class="auth-bg-glow auth-bg-glow-two"></div>
+  <main class="auth-layout auth-simple-layout">
+    <section class="auth-card auth-v2-card auth-simple-card">
+      <div class="brand-block static auth-brand compact-auth-brand">
+        <span class="brand-mark">VA</span>
+        <span><strong>Vignan AI</strong></span>
+      </div>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}{% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </section>
+  </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.password-toggle').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const wrap = btn.closest('.password-wrap');
+          const input = wrap ? wrap.querySelector('input') : null;
+          if (!input) return;
+          input.type = input.type === 'password' ? 'text' : 'password';
+          btn.textContent = input.type === 'password' ? 'Show' : 'Hide';
+        });
+      });
+      const adminCodeBox = document.querySelector('[data-admin-code-box]');
+      const roleInputs = document.querySelectorAll('input[name="role"]');
+      function syncAdminCode(){
+        const checked = document.querySelector('input[name="role"]:checked');
+        if(adminCodeBox){
+          const isAdmin = checked && checked.value === 'admin';
+          adminCodeBox.style.display = isAdmin ? 'block' : 'none';
+          const input = adminCodeBox.querySelector('input');
+          if(input) input.required = isAdmin;
+        }
+        document.querySelectorAll('.role-card').forEach(card => {
+          const input = card.querySelector('input');
+          card.classList.toggle('selected', input && input.checked);
+        });
+      }
+      roleInputs.forEach(input => input.addEventListener('change', syncAdminCode));
+      syncAdminCode();
+      document.querySelectorAll('form.premium-form').forEach((form) => {
+        form.addEventListener('submit', () => {
+          const btn = form.querySelector('button[type="submit"]');
+          if (btn) {
+            btn.dataset.original = btn.textContent;
+            btn.textContent = 'Please wait...';
+            btn.disabled = true;
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
