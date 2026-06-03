@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: vignanai
+    env: python
+
+    buildCommand: |
+      pip install -r requirements.txt
+
+    startCommand: gunicorn app:app
+
+    aptPackages:
+      - tesseract-ocr
